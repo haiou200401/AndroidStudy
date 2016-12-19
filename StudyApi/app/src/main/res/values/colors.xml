@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="colorPrimary">#3F51B5</color>
+    <color name="colorPrimaryDark">#303F9F</color>
+    <color name="colorAccent">#FF4081</color>
+
+    <color name="url_bg_grey">#E6E6E6</color>
+    <color name="setting_line_new">#eBe9eb</color>
+    <color name="custom_dialog_content_text">#76787a</color>
+    <color name="text_highlight_color">#C6DAFC</color>
+    <color name="light_normal_color">#5A5A5A</color>
+    <color name="light_active_color">#4285F4</color>
+    <color name="image_viewer_toolbar_bg">#33000000</color>
+    <color name="white">#FFFFFF</color>
+
+    <color name="menubar_item_text_dis">#aaacad</color>
+    <color name="menubar_item_text2">#5c5f62</color>
+</resources>

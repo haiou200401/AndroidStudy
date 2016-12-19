@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+                android:background="@color/url_bg_grey"
+                android:minHeight="@dimen/title_bar_min_height"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content">
+
+    <com.studyapi.view.ThemeModeTextView
+        android:id="@+id/back"
+        style="@style/record_item_title"
+        android:layout_alignParentStart="true"
+        android:layout_centerVertical="true"
+        android:gravity="center"
+        android:minHeight="@dimen/button_min_size"
+        android:minWidth="@dimen/button_min_size"
+        android:textSize="15sp"
+        android:background="@drawable/title_back"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"/>
+
+    <com.studyapi.view.ThemeModeTextView
+        android:id="@+id/title"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_centerInParent="true"
+        android:layout_marginStart="115dp"
+        android:ellipsize="end"
+        android:singleLine="true"
+        android:text="@string/setting"
+        android:textSize="@dimen/setting_pref_head_text_size" />
+
+</RelativeLayout>

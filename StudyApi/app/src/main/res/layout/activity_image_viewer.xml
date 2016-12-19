@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".images.KantuModeActivity">
+<!--
+    <com.studyapi.images.libs.GestureImageView
+        android:id="@+id/image"
+        android:layout_width="fill_parent"
+        android:layout_height="fill_parent"
+        android:scaleType="centerInside"
+        android:src="@mipmap/image_viewer_1"/>
+-->
+    <com.studyapi.images.view.ImageViewer
+        android:id="@+id/id_image_viewer"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="#000000"
+        >
+    </com.studyapi.images.view.ImageViewer>
+
+</RelativeLayout>

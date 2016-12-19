@@ -1,0 +1,91 @@
+<?xml version="1.0" encoding="utf-8"?>
+<merge xmlns:android="http://schemas.android.com/apk/res/android">
+    <FrameLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="#000000"
+        >
+        <android.support.v4.view.ViewPager
+            android:id="@+id/id_view_pager"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:background="#000000"
+            >
+        </android.support.v4.view.ViewPager>
+    </FrameLayout>
+    <FrameLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+
+        <RelativeLayout
+            android:id="@+id/id_title_bar"
+            android:background="@color/image_viewer_toolbar_bg"
+            android:minHeight="@dimen/title_bar_min_height"
+            android:layout_width="match_parent"
+            android:layout_height="@dimen/title_bar_min_height">
+
+            <TextView
+                android:id="@+id/id_exit"
+                android:layout_alignParentStart="true"
+                android:layout_centerVertical="true"
+                android:gravity="center"
+                android:minHeight="@dimen/button_min_size"
+                android:minWidth="@dimen/button_min_size"
+                android:background="@drawable/title_back"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"/>
+
+            <TextView
+                android:id="@+id/id_title"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_centerInParent="true"
+                android:layout_marginStart="115dp"
+                android:ellipsize="end"
+                android:singleLine="true"
+                android:textColor="@color/white"
+                android:textSize="@dimen/setting_pref_head_text_size" />
+
+        </RelativeLayout>
+
+        <LinearLayout
+            android:id="@+id/id_bottom_bar"
+            android:orientation="horizontal"
+            android:layout_width="match_parent"
+            android:layout_height="55dp"
+            android:layout_gravity="left|bottom"
+            android:background="@color/image_viewer_toolbar_bg"
+            android:weightSum="1">
+
+            <ImageButton
+                android:id="@+id/id_image_download"
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent"
+                android:layout_margin="0dp"
+                android:padding="0dp"
+                android:background="#00000000"
+                android:src="@drawable/font_download_icon_theme"
+                android:scaleType="fitXY"
+                android:layout_weight="0.33"/>
+
+            <ImageButton
+                android:id="@+id/id_image_share"
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent"
+                android:layout_margin="0dp"
+                android:padding="0dp"
+                android:src="@drawable/media_share_button_normal"
+                android:layout_weight="0.33"/>
+
+            <ImageButton
+                android:id="@+id/id_image_info"
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent"
+                android:layout_margin="0dp"
+                android:padding="0dp"
+                android:src="@drawable/media_more_button_normal"
+                android:layout_weight="0.34"/>
+        </LinearLayout>
+    </FrameLayout>
+
+</merge>

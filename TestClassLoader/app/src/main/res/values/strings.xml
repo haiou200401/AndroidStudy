@@ -1,0 +1,11 @@
+<resources>
+    <string name="app_name">Test ClassLoader</string>
+    <string name="app_str1">app string1</string>
+    <string name="app_str2">app string2</string>
+    <string name="app_str3">app string3</string>
+    <string name="app_str4">app string4</string>
+    <string name="app_str5">app string5</string>
+    <string name="app_str6">app string6</string>
+    <string name="app_str7">app string7</string>
+    <string name="app_str8">app string8</string>
+</resources>

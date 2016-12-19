@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context="com.studyapi.anim.AnimActivity">
+    <com.studyapi.anim.CustomViewPager
+        android:id="@+id/id_viewpager"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+        <ImageView
+            android:id="@+id/id_left_dumy_view"
+            android:background="#0000ff"
+            android:scaleType="fitEnd"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent" />
+        <ImageView
+            android:id="@+id/id_center_dumy_view"
+            android:background="#00ff00"
+            android:scaleType="fitEnd"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent" />
+        <ImageView
+            android:id="@+id/id_right_dumy_view"
+            android:background="#00ff00"
+            android:scaleType="fitEnd"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent" />
+    </com.studyapi.anim.CustomViewPager>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+        <Button
+            android:id="@+id/id_select_prev"
+            android:text="Prev"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content" />
+        <Button
+            android:id="@+id/id_select_next"
+            android:text="Next"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content" />
+    </LinearLayout>
+</RelativeLayout>

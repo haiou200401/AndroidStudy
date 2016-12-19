@@ -1,0 +1,11 @@
+<resources>
+    <string name="app_name">My Plugin</string>
+    <string name="myplugin_str1">myplugin string1</string>
+    <string name="myplugin_str2">myplugin string2</string>
+    <string name="myplugin_str3">myplugin string3</string>
+    <string name="myplugin_str4">myplugin string4</string>
+    <string name="myplugin_str5">myplugin string5</string>
+    <string name="myplugin_str6">myplugin string6</string>
+    <string name="myplugin_str7">myplugin string7</string>
+    <string name="myplugin_str8">myplugin string8</string>
+</resources>
