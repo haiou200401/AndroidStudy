@@ -1,0 +1,6 @@
+include ':app'
+//, ':x5sdk'
+
+include ':x5sdk'
+project(':x5sdk').projectDir = new File('../x5sdk')
+
