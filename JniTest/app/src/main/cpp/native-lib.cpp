@@ -43,7 +43,12 @@ namespace GraphicsJNI {
     }
 
     void* getNativeCanvas(JNIEnv* env, jobject canvas) {
-        void* c = (void*)env->GetIntField(canvas, gCanvas_nativeInstanceID);
+        void* c = NULL;
+        if (isLongOfNativeCanvas()) {
+            c = (void*)env->GetLongField(canvas, gCanvas_nativeInstanceID);
+        } else {
+            c = (void*)env->GetIntField(canvas, gCanvas_nativeInstanceID);
+        }
         return c;
     }
 
