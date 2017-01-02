@@ -4,7 +4,7 @@ android {
     compileSdkVersion 23
     buildToolsVersion "23.0.3"
     defaultConfig {
-        applicationId "com.yiming.servicetest"
+        applicationId "com.yiming.jnitest"
         minSdkVersion 16
         targetSdkVersion 23
         versionCode 1
@@ -15,11 +15,8 @@ android {
             }
         }
         ndk {
-            // Specifies the ABI configurations of your native
-            // libraries Gradle should build and package with your APK.
             abiFilters 'armeabi-v7a'
         }
-
     }
     buildTypes {
         release {
@@ -27,20 +24,12 @@ android {
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
         }
     }
-
     externalNativeBuild {
         cmake {
             path "CMakeLists.txt"
         }
     }
-
 }
 
 dependencies {
-    compile fileTree(include: ['*.jar'], dir: 'libs')
-    androidTestCompile('com.android.support.test.espresso:espresso-core:2.2.2', {
-        exclude group: 'com.android.support', module: 'support-annotations'
-    })
-    compile 'com.android.support:appcompat-v7:23.4.0'
-    compile project(':addoninterface')
 }
