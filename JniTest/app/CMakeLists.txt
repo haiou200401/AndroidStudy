@@ -21,7 +21,15 @@ add_library( # Sets the name of the library.
              src/main/cpp/native-lib.cpp
              src/main/cpp/dynamic_library.cpp
              src/main/cpp/system_skia.cpp
-             src/main/cpp/mycppfile.cpp)
+             src/main/cpp/skia_adapter/SkCanvasState.cpp
+             src/main/cpp/skia_adapter/SkiaCommon.cpp
+             src/main/cpp/skia_adapter/SkCanvasStateApi16.cpp
+             src/main/cpp/skia_adapter/SkiaApi16.cpp
+             src/main/cpp/skia_adapter/SkCanvasStateApi17.cpp
+             src/main/cpp/skia_adapter/SkiaApi17.cpp
+             src/main/cpp/skia_adapter/SkCanvasStateApi18.cpp
+             src/main/cpp/skia_adapter/SkiaApi18.cpp
+             src/main/cpp/android_utils.cpp)
 
 # Searches for a specified prebuilt library and stores the path as a
 # variable. Because system libraries are included in the search path by

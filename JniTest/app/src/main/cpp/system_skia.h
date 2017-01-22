@@ -8,21 +8,36 @@
 
 #include "dynamic_library.h"
 
+class SkCanvasState;
+class SkCanvas;
+
+class SkCanvasState_v1;
+
 class SystemSkia {
 public:
+    static SystemSkia* Create(int android_version);
+    static void Release(SystemSkia* skia);
+
+    SkCanvasState* CaptureCanvasState(SkCanvas* systemCanvas);
+    void ReleaseCanvasState(SkCanvasState* canvasState);
+
+
+protected:
     SystemSkia();
     ~SystemSkia();
 
-    void* CaptureCanvasState(void* systemCanvas);
-    void ReleaseCanvasState(void* canvasState);
+    virtual bool convertCanvasState(SkCanvasState_v1* target, SkCanvasState* systemCanvasState) {
+        return false;
+    }
 
-private:
+    virtual void releaseCanvasStateBefore(SkCanvasState_v1* v1) {}
+
     // SK_API SkCanvasState* CaptureCanvasState(SkCanvas* canvas);
-    typedef void*	(*CaptureCanvasStateFunc)	(void* buffer);
+    typedef void*	(*CaptureCanvasStateFunc)	(void* canvas);
     CaptureCanvasStateFunc m_fnCaptureCanvasState;
 
     // SK_API void ReleaseCanvasState(SkCanvasState* state);
-    typedef void (*ReleaseCanvasStateFunc) (void* ptr);
+    typedef void (*ReleaseCanvasStateFunc) (void* state);
     ReleaseCanvasStateFunc m_fnReleaseCanvasState;
 
     DynamicLibrary library;

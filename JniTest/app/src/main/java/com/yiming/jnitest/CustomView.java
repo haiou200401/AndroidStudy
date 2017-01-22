@@ -1,6 +1,7 @@
 package com.yiming.jnitest;
 
 import android.content.Context;
+import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
@@ -53,6 +54,12 @@ public class CustomView extends View {
 
         String str = stringFromJNI();
         canvas.drawText(str, 300, 300, paint);
+
+
+        Bitmap bitmap = Bitmap.createBitmap(300, 300, Bitmap.Config.ARGB_8888);
+        Canvas canvas2 = new Canvas(bitmap);
+        canvas2.saveLayer(50, 60, 150, 160, paint, Canvas.ALL_SAVE_FLAG);
+        drawCanvasJNI(canvas2);
 
         drawCanvasJNI(canvas);
         int ddd = 0;

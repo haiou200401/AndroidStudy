@@ -1,22 +1,9 @@
 #include <jni.h>
 #include <string>
 
-#include "mycppfile.h"
+#include "android_utils.h"
 #include "system_skia.h"
-
-namespace plat_support {
-
-
-    static int g_android_version = 16;
-
-    void initAndroidVersion(int version) {
-        g_android_version = version;
-    }
-
-    int getAndroidVersion() {
-        return g_android_version;
-    }
-}
+#include "skia_adapter/SkCanvasState.h"
 
 namespace GraphicsJNI {
 
@@ -42,14 +29,24 @@ namespace GraphicsJNI {
         return 0;
     }
 
-    void* getNativeCanvas(JNIEnv* env, jobject canvas) {
-        void* c = NULL;
+    class Canvas{
+            public:
+            virtual ~Canvas() { };
+            virtual void* asSkCanvas() = 0;
+    };
+
+    void* getSkCanvas(JNIEnv* env, jobject jcanvas) {
+        void* skcanvas = NULL;
         if (isLongOfNativeCanvas()) {
-            c = (void*)env->GetLongField(canvas, gCanvas_nativeInstanceID);
+            jlong canvasHandle = env->GetLongField(jcanvas, gCanvas_nativeInstanceID);
+            Canvas* canvas = reinterpret_cast<Canvas*>(canvasHandle);
+            if (NULL != canvas) {
+                skcanvas = canvas->asSkCanvas();
+            }
         } else {
-            c = (void*)env->GetIntField(canvas, gCanvas_nativeInstanceID);
+            skcanvas = (void*)env->GetIntField(jcanvas, gCanvas_nativeInstanceID);
         }
-        return c;
+        return skcanvas;
     }
 
 } //namespace GraphicsJNI
@@ -92,27 +89,32 @@ Java_com_yiming_jnitest_CustomView_stringFromJNI(
         JNIEnv* env,
         jobject /* this */) {
     std::string hello = "Hello from C++";
-    c1 c1;
-    int result = c1.add(3, 8);
     //printf("result = %d", result);
     char buf[256];
-    sprintf(buf, "result = %d;", result);
+    sprintf(buf, "result = %d;", 3);
     hello = buf;
     return env->NewStringUTF(hello.c_str());
 }
 
+static SystemSkia* g_systemSkia = NULL;
 jstring
 Java_com_yiming_jnitest_CustomView_drawCanvasJNI(
         JNIEnv* env,
         jobject /* this */, jobject java_canvas) {
     std::string hello = "Hello from C++";
 
-    void* ptr_canvas = GraphicsJNI::getNativeCanvas(env, java_canvas);
+    void* ptr_canvas = GraphicsJNI::getSkCanvas(env, java_canvas);
+    SkCanvasState *ptr = NULL;
+    if (plat_support::getAndroidVersion() <= 18) {
+        ptr = SkCanvasStateFactory::Instance()->CaptureCanvasState(ptr_canvas);
+        SkCanvasStateFactory::Instance()->ReleaseCanvasState(ptr);
+    } else {
+        if (!g_systemSkia)
+            g_systemSkia = SystemSkia::Create(plat_support::getAndroidVersion());
 
-
-    SystemSkia systemSkia;
-    void* ptr = systemSkia.CaptureCanvasState(ptr_canvas);
-    systemSkia.ReleaseCanvasState(ptr);
+        ptr = g_systemSkia->CaptureCanvasState((SkCanvas *) ptr_canvas);
+        g_systemSkia->ReleaseCanvasState(ptr);
+    }
 
     return env->NewStringUTF(hello.c_str());
 }
