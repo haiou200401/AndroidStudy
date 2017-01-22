@@ -1,8 +1,0 @@
-
-    <resources>
-        <string-array name="refresh_names">
-            <item>Manually</item>
-            <item>On start</item>
-            <item>Periodically</item>
-        </string-array>
-    </resources>
