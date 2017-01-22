@@ -58,6 +58,10 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
+    public void click_call_download(View btn) {
+        WebViewDownloader.instance().startDownload();
+    }
+
     public void click_start_service(View btn) {
         Log.e(TAG, "click_start_service");
         Intent intent = new Intent();
