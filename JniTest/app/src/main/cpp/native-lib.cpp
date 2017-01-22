@@ -59,6 +59,7 @@ jint JNI_OnLoad(JavaVM *vm, void *reserved);
 void Java_com_yiming_jnitest_CustomView_initFromJNI(JNIEnv *env, jobject, int);
 jstring Java_com_yiming_jnitest_CustomView_stringFromJNI(JNIEnv *env, jobject /* this */);
 jstring Java_com_yiming_jnitest_CustomView_drawCanvasJNI(JNIEnv *env, jobject, jobject java_canvas);
+void Java_com_yiming_jnitest_CustomView_nativeCallNative(JNIEnv* env, jobject /* this */, jstring path);
 }
 
 int g_android_version = 0;
@@ -118,3 +119,17 @@ Java_com_yiming_jnitest_CustomView_drawCanvasJNI(
 
     return env->NewStringUTF(hello.c_str());
 }
+
+void Java_com_yiming_jnitest_CustomView_nativeCallNative(JNIEnv* env, jobject /* this */, jstring path) {
+    const char* filename = env->GetStringUTFChars(path, NULL);
+    FILE* result = NULL;
+    result = fopen(filename, "w+");
+    if (result) {
+        printf("ok");
+    } else {
+        printf("no");
+    }
+
+    env->ReleaseStringUTFChars(path, filename);
+}
+

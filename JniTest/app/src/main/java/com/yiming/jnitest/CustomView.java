@@ -7,9 +7,13 @@ import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.Rect;
 import android.os.Build;
+import android.os.Environment;
 import android.util.AttributeSet;
+import android.util.Log;
 import android.view.MotionEvent;
 import android.view.View;
+
+import java.io.File;
 
 /**
  * Created by gaoqingguang on 2016/12/13.
@@ -61,8 +65,30 @@ public class CustomView extends View {
         canvas2.saveLayer(50, 60, 150, 160, paint, Canvas.ALL_SAVE_FLAG);
         drawCanvasJNI(canvas2);
 
-        drawCanvasJNI(canvas);
+        //drawCanvasJNI(canvas);
         int ddd = 0;
+    }
+
+    public void callNative() {
+        //File rootDir = this.getContext().getExternalCacheDir();
+        File rootDir = Environment.getExternalStorageDirectory();
+
+        if (rootDir.isDirectory()) {
+            File newFile = new File(rootDir, "javafile.txt");
+            try {
+                newFile.createNewFile();
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+            if (newFile.exists()) {
+                Log.e("gqg", "ddddd");
+            }
+
+        }
+        String path = this.getContext().getExternalCacheDir().getAbsolutePath();
+        //String path = this.getContext().getCacheDir().getAbsolutePath();
+        path += "/myfile.txt";
+        nativeCallNative(path);
     }
 
 
@@ -81,4 +107,5 @@ public class CustomView extends View {
     public native void initFromJNI(int android_version);
     public native String stringFromJNI();
     public native String drawCanvasJNI(Canvas canvas);
+    public native void nativeCallNative(String path);
 }
