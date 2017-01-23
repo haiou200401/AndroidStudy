@@ -17,6 +17,7 @@ import android.view.View;
 import com.yiming.addoninterface.Action;
 import com.yiming.addoninterface.IAddonInterface;
 
+import java.io.File;
 import java.util.List;
 
 public class MainActivity extends AppCompatActivity {
@@ -32,6 +33,14 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         mAddonConnection = new AddonConnection();
+
+        try {
+            File file = this.getDir("qw", 0);
+            String absPath = file.getAbsolutePath();
+            Log.e("gqg:", absPath);
+        } catch (Exception exp) {
+            exp.printStackTrace();;
+        }
 
         PackageManager pm = this.getPackageManager();
         Intent baseIntent = new Intent(ADDON_ACTION);
@@ -59,7 +68,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
     public void click_call_download(View btn) {
-        WebViewDownloader.instance().startDownload();
+        QwsDownloader.instance().startDownload();
     }
 
     public void click_start_service(View btn) {

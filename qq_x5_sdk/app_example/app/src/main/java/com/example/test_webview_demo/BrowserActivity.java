@@ -75,7 +75,8 @@ public class BrowserActivity extends Activity{
 	
 	private RelativeLayout mMenu;
 	
-	private static final String mHomeUrl =  "http://app.html5.qq.com/navi/index";
+	//private static final String mHomeUrl =  "http://app.html5.qq.com/navi/index";
+	private static final String mHomeUrl =  "http://so.com";
 	private static final String TAG = "SdkDemo";
 	private static final int MAX_LENGTH = 14;
 	private boolean mNeedTestPage = false;
