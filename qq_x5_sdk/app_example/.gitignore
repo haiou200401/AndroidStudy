@@ -1,0 +1,4 @@
+/build
+/.gradle
+/.idea
+.idea/workspace.xml

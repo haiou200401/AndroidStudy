@@ -68,7 +68,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
     public void click_call_download(View btn) {
-        QwsDownloader.instance().startDownload();
+        QwsDownloader.instance().startDownload(this);
     }
 
     public void click_start_service(View btn) {
