@@ -20,14 +20,24 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_main);
 
+
+        //initListView();
+        initScrollView();
+        //setFastScroller();
+    }
+
+    private void initScrollView() {
+        setContentView(R.layout.activity_scrollview);
+
+    }
+
+    private void initListView() {
+        setContentView(R.layout.activity_main);
         mListView = (ListView)findViewById(R.id.id_listview);
         mListView.setFastScrollEnabled(true);
         List<Map<String, Object>> list=getData();
         mListView.setAdapter(new MyAdapter(this, list));
-
-        setFastScroller();
     }
 
     private void setFastScroller() {
