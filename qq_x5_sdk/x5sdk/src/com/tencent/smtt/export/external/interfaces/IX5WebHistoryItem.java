@@ -1,7 +1,7 @@
 package com.tencent.smtt.export.external.interfaces;
 
-import android.graphics.Bitmap;
-import android.graphics.Canvas;
+        import android.graphics.Bitmap;
+        import android.graphics.Canvas;
 
 public interface IX5WebHistoryItem {
     boolean canDrawBaseLayer();

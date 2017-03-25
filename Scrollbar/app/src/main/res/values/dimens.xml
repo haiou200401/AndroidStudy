@@ -1,0 +1,20 @@
+<resources>
+    <!-- Default screen margins, per the Android Design guidelines. -->
+    <dimen name="activity_horizontal_margin">16dp</dimen>
+    <dimen name="activity_vertical_margin">16dp</dimen>
+
+    <!-- Minimum size of the fastscroll overlay -->
+    <dimen name="fastscroll_overlay_size">104dp</dimen>
+    <!-- Text size of the fastscroll overlay -->
+    <dimen name="fastscroll_overlay_text_size">52sp</dimen>
+    <!-- Padding of the fastscroll overlay -->
+    <dimen name="fastscroll_overlay_padding">16dp</dimen>
+    <!-- Width of the fastscroll thumb -->
+    <dimen name="fastscroll_thumb_width">64dp</dimen>
+    <!-- Height of the fastscroll thumb -->
+    <dimen name="fastscroll_thumb_height">52dp</dimen>
+    <!-- Min width for a tablet device -->
+    <dimen name="min_xlarge_screen_width">800dp</dimen>
+
+
+</resources>
