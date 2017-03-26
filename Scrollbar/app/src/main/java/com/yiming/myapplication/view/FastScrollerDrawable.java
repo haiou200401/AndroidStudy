@@ -1,21 +1,5 @@
 package com.yiming.myapplication.view;
 
-/*
- * Copyright (C) 2008 The Android Open Source Project
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
 import android.os.SystemClock;
 
 import android.content.Context;
@@ -24,32 +8,18 @@ import android.content.res.TypedArray;
 import android.graphics.Canvas;
 import android.graphics.Paint;
 import android.graphics.Rect;
-import android.graphics.RectF;
 import android.graphics.drawable.Drawable;
-import android.graphics.drawable.NinePatchDrawable;
 import android.os.Handler;
-import android.os.SystemClock;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewConfiguration;
 import android.view.ViewGroup;
-import android.widget.AbsListView;
-import android.widget.AbsListView.OnScrollListener;
-import android.widget.Adapter;
-import android.widget.BaseAdapter;
-import android.widget.ExpandableListAdapter;
-import android.widget.ExpandableListView;
-import android.widget.FrameLayout;
-import android.widget.HeaderViewListAdapter;
-import android.widget.ListView;
-import android.widget.SectionIndexer;
-
 import com.yiming.myapplication.R;
 
 import java.lang.reflect.Method;
 
 /**
- * Helper class for AbsListView to draw and control the Fast Scroll thumb
+ * Helper class for ViewGroup to draw and control the Fast Scroll thumb
  */
 class FastScrollerDrawable {
     private static final String TAG = "FastScrollerDrawable";
@@ -93,29 +63,17 @@ class FastScrollerDrawable {
     private static final int OVERLAY_AT_THUMB = 1;
 
     private Drawable mThumbDrawable;
-    private Drawable mOverlayDrawable;
     private Drawable mTrackDrawable;
-
-    private Drawable mOverlayDrawableLeft;
-    private Drawable mOverlayDrawableRight;
 
     int mThumbH;
     int mThumbW;
     int mThumbY;
 
-    private RectF mOverlayPos;
-    private int mOverlaySize;
-
-    ViewGroup mList;
+    ViewGroup mViewGroup;
     boolean mScrollCompleted;
-    private int mVisibleItem;
     private Paint mPaint;
-    private int mListOffset;
-    private int mItemCount = -1;
     private boolean mLongList;
 
-    private String mSectionText;
-    private boolean mDrawOverlay;
     private ScrollFade mScrollFade;
 
     private int mState;
@@ -123,32 +81,25 @@ class FastScrollerDrawable {
     private Handler mHandler = new Handler();
 
     private boolean mChangedBounds;
-
-    private int mPosition;
-
     private boolean mAlwaysShow;
-
-    private int mOverlayPosition;
 
     float mInitialTouchY;
     boolean mPendingDrag;
     private int mScaledTouchSlop;
 
     private int mScrollRange = 0;
-    private float mPressOffsetInThumb; //todo:gqg;
+    private int mPressOffsetInThumb; //todo:gqg;
 
 
     private static final int FADE_TIMEOUT = 1500;
     private static final int PENDING_DRAG_DELAY = 180;
 
-    private final Rect mTmpRect = new Rect();
-
     private final Runnable mDeferStartDrag = new Runnable() {
         public void run() {
-            if (true) { //mList.mIsAttached) {
+            if (mViewGroup.isAttachedToWindow()) { //mViewGroup.mIsAttached) {
                 beginDrag();
 
-                final int viewHeight = mList.getHeight();
+                final int viewHeight = mViewGroup.getHeight();
                 // Jitter
                 int newThumbY = (int) mInitialTouchY - mThumbH + 10;
                 if (newThumbY < 0) {
@@ -165,7 +116,7 @@ class FastScrollerDrawable {
     };
 
     public FastScrollerDrawable(Context context, ViewGroup listView) {
-        mList = listView;
+        mViewGroup = listView;
         init(context);
     }
 
@@ -194,20 +145,6 @@ class FastScrollerDrawable {
         }
     }
 
-    public void setScrollbarPosition(int position) {
-        mPosition = position;
-        switch (position) {
-            default:
-            case View.SCROLLBAR_POSITION_DEFAULT:
-            case View.SCROLLBAR_POSITION_RIGHT:
-                mOverlayDrawable = mOverlayDrawableRight;
-                break;
-            case View.SCROLLBAR_POSITION_LEFT:
-                mOverlayDrawable = mOverlayDrawableLeft;
-                break;
-        }
-    }
-
     public int getWidth() {
         return mThumbW;
     }
@@ -216,7 +153,7 @@ class FastScrollerDrawable {
         switch (state) {
             case STATE_NONE:
                 mHandler.removeCallbacks(mScrollFade);
-                mList.invalidate();
+                mViewGroup.invalidate();
                 break;
             case STATE_VISIBLE:
                 if (mState != STATE_VISIBLE) { // Optimization
@@ -227,8 +164,7 @@ class FastScrollerDrawable {
                 mHandler.removeCallbacks(mScrollFade);
                 break;
             case STATE_EXIT:
-                int viewWidth = mList.getWidth();
-                mList.invalidate(viewWidth - mThumbW, mThumbY, viewWidth, mThumbY + mThumbH);
+                onlyInvalidateThumb();
                 break;
         }
         mState = state;
@@ -240,17 +176,9 @@ class FastScrollerDrawable {
     }
 
     private void resetThumbPos() {
-        final int viewWidth = mList.getWidth();
+        final int viewWidth = mViewGroup.getWidth();
         // Bounds are always top right. Y coordinate get's translated during draw
-        switch (mPosition) {
-            case View.SCROLLBAR_POSITION_DEFAULT:
-            case View.SCROLLBAR_POSITION_RIGHT:
-                mThumbDrawable.setBounds(viewWidth - mThumbW, 0, viewWidth, mThumbH);
-                break;
-            case View.SCROLLBAR_POSITION_LEFT:
-                mThumbDrawable.setBounds(0, 0, mThumbW, mThumbH);
-                break;
-        }
+        mThumbDrawable.setBounds(viewWidth - mThumbW, 0, viewWidth, mThumbH);
         mThumbDrawable.setAlpha(ScrollFade.ALPHA_MAX);
     }
 
@@ -272,22 +200,12 @@ class FastScrollerDrawable {
         // Get both the scrollbar states drawables
         TypedArray ta = context.getTheme().obtainStyledAttributes(ATTRS);
         useThumbDrawable(context, ta.getDrawable(THUMB_DRAWABLE));
-        mTrackDrawable = ta.getDrawable(TRACK_DRAWABLE);
-
-        mOverlayDrawableLeft = ta.getDrawable(PREVIEW_BACKGROUND_LEFT);
-        mOverlayDrawableRight = ta.getDrawable(PREVIEW_BACKGROUND_RIGHT);
-        mOverlayPosition = ta.getInt(OVERLAY_POSITION, OVERLAY_FLOATING);
+        //mTrackDrawable = ta.getDrawable(TRACK_DRAWABLE);
 
         mScrollCompleted = true;
-
-        mOverlaySize = context.getResources().getDimensionPixelSize(
-                R.dimen.fastscroll_overlay_size);
-        mOverlayPos = new RectF();
         mScrollFade = new ScrollFade();
         mPaint = new Paint();
         mPaint.setAntiAlias(true);
-        mPaint.setTextAlign(Paint.Align.CENTER);
-        mPaint.setTextSize(mOverlaySize / 2);
 
         ColorStateList textColor = ta.getColorStateList(TEXT_COLOR);
         int textColorNormal = textColor.getDefaultColor();
@@ -295,8 +213,8 @@ class FastScrollerDrawable {
         mPaint.setStyle(Paint.Style.FILL_AND_STROKE);
 
         // to show mOverlayDrawable properly
-        if (mList.getWidth() > 0 && mList.getHeight() > 0) {
-            onSizeChanged(mList.getWidth(), mList.getHeight(), 0, 0);
+        if (mViewGroup.getWidth() > 0 && mViewGroup.getHeight() > 0) {
+            onSizeChanged(mViewGroup.getWidth(), mViewGroup.getHeight(), 0, 0);
         }
 
         mState = STATE_NONE;
@@ -305,8 +223,6 @@ class FastScrollerDrawable {
         ta.recycle();
 
         mScaledTouchSlop = ViewConfiguration.get(context).getScaledTouchSlop();
-
-        setScrollbarPosition(mList.getVerticalScrollbarPosition());
     }
 
     void stop() {
@@ -317,6 +233,13 @@ class FastScrollerDrawable {
         return !(mState == STATE_NONE);
     }
 
+    private void onlyInvalidateThumb() {
+        int viewWidth = mViewGroup.getWidth();
+        int scrollY = mViewGroup.getScrollY();
+        int y = mThumbY + scrollY;
+        mViewGroup.invalidate(viewWidth - mThumbW, y, viewWidth, y + mThumbH);
+    }
+
     public void draw(Canvas canvas) {
 
         if (mState == STATE_NONE) {
@@ -325,7 +248,7 @@ class FastScrollerDrawable {
         }
 
         canvas.save();
-        int scrollY = mList.getScrollY();
+        int scrollY = mViewGroup.getScrollY();
         canvas.translate(0, scrollY);
         drawScrollBar(canvas);
         canvas.restore();
@@ -335,7 +258,7 @@ class FastScrollerDrawable {
     void drawScrollBar(Canvas canvas) {
 
         final int y = mThumbY;
-        final int viewWidth = mList.getWidth();
+        final int viewWidth = mViewGroup.getWidth();
         final FastScrollerDrawable.ScrollFade scrollFade = mScrollFade;
 
         int alpha = -1;
@@ -344,16 +267,7 @@ class FastScrollerDrawable {
             if (alpha < ScrollFade.ALPHA_MAX / 2) {
                 mThumbDrawable.setAlpha(alpha * 2);
             }
-            int left = 0;
-            switch (mPosition) {
-                case View.SCROLLBAR_POSITION_DEFAULT:
-                case View.SCROLLBAR_POSITION_RIGHT:
-                    left = viewWidth - (mThumbW * alpha) / ScrollFade.ALPHA_MAX;
-                    break;
-                case View.SCROLLBAR_POSITION_LEFT:
-                    left = -mThumbW + (mThumbW * alpha) / ScrollFade.ALPHA_MAX;
-                    break;
-            }
+            int left = viewWidth - (mThumbW * alpha) / ScrollFade.ALPHA_MAX;
             mThumbDrawable.setBounds(left, 0, left + mThumbW, mThumbH);
             mChangedBounds = true;
         }
@@ -365,7 +279,7 @@ class FastScrollerDrawable {
             final int trackWidth = mTrackDrawable.getIntrinsicWidth();
             final int trackLeft = (left + mThumbW / 2) - trackWidth / 2;
             mTrackDrawable.setBounds(trackLeft, halfThumbHeight,
-                    trackLeft + trackWidth, mList.getHeight() - halfThumbHeight);
+                    trackLeft + trackWidth, mViewGroup.getHeight() - halfThumbHeight);
             mTrackDrawable.draw(canvas);
         }
 
@@ -373,87 +287,20 @@ class FastScrollerDrawable {
         mThumbDrawable.draw(canvas);
         canvas.translate(0, -y);
 
-        // If user is dragging the scroll bar, draw the alphabet overlay
-        if (mState == STATE_DRAGGING && mDrawOverlay) {
-            if (mOverlayPosition == OVERLAY_AT_THUMB) {
-                int left = 0;
-                switch (mPosition) {
-                    default:
-                    case View.SCROLLBAR_POSITION_DEFAULT:
-                    case View.SCROLLBAR_POSITION_RIGHT:
-                        left = Math.max(0,
-                                mThumbDrawable.getBounds().left - mThumbW - mOverlaySize);
-                        break;
-                    case View.SCROLLBAR_POSITION_LEFT:
-                        left = Math.min(mThumbDrawable.getBounds().right + mThumbW,
-                                mList.getWidth() - mOverlaySize);
-                        break;
-                }
-
-                int top = Math.max(0,
-                        Math.min(y + (mThumbH - mOverlaySize) / 2, mList.getHeight() - mOverlaySize));
-
-                final RectF pos = mOverlayPos;
-                pos.left = left;
-                pos.right = pos.left + mOverlaySize;
-                pos.top = top;
-                pos.bottom = pos.top + mOverlaySize;
-                if (mOverlayDrawable != null) {
-                    mOverlayDrawable.setBounds((int) pos.left, (int) pos.top,
-                            (int) pos.right, (int) pos.bottom);
-                }
-            }
-            mOverlayDrawable.draw(canvas);
-            final Paint paint = mPaint;
-            float descent = paint.descent();
-            final RectF rectF = mOverlayPos;
-            final Rect tmpRect = mTmpRect;
-            mOverlayDrawable.getPadding(tmpRect);
-            final int hOff = (tmpRect.right - tmpRect.left) / 2;
-            final int vOff = (tmpRect.bottom - tmpRect.top) / 2;
-            canvas.drawText(mSectionText, (int) (rectF.left + rectF.right) / 2 - hOff,
-                    (int) (rectF.bottom + rectF.top) / 2 + mOverlaySize / 4 - descent - vOff,
-                    paint);
-        } else if (mState == STATE_EXIT) {
+        if (mState == STATE_EXIT) {
             if (alpha == 0) { // Done with exit
                 setState(STATE_NONE);
             } else if (mTrackDrawable != null) {
-                mList.invalidate(viewWidth - mThumbW, 0, viewWidth, mList.getHeight());
+                mViewGroup.invalidate(viewWidth - mThumbW, 0, viewWidth, mViewGroup.getHeight());
             } else {
-                mList.invalidate(viewWidth - mThumbW, y, viewWidth, y + mThumbH);
+                onlyInvalidateThumb();
             }
         }
     }
 
     void onSizeChanged(int w, int h, int oldw, int oldh) {
         if (mThumbDrawable != null) {
-            switch (mPosition) {
-                default:
-                case View.SCROLLBAR_POSITION_DEFAULT:
-                case View.SCROLLBAR_POSITION_RIGHT:
-                    mThumbDrawable.setBounds(w - mThumbW, 0, w, mThumbH);
-                    break;
-                case View.SCROLLBAR_POSITION_LEFT:
-                    mThumbDrawable.setBounds(0, 0, mThumbW, mThumbH);
-                    break;
-            }
-        }
-        if (mOverlayPosition == OVERLAY_FLOATING) {
-            final RectF pos = mOverlayPos;
-            pos.left = (w - mOverlaySize) / 2;
-            pos.right = pos.left + mOverlaySize;
-            pos.top = h / 10; // 10% from top
-            pos.bottom = pos.top + mOverlaySize;
-            if (mOverlayDrawable != null) {
-                mOverlayDrawable.setBounds((int) pos.left, (int) pos.top,
-                        (int) pos.right, (int) pos.bottom);
-            }
-        }
-    }
-
-    void onItemCountChanged(int oldCount, int newCount) {
-        if (mAlwaysShow) {
-            mLongList = true;
+            mThumbDrawable.setBounds(w - mThumbW, 0, w, mThumbH);
         }
     }
 
@@ -461,7 +308,7 @@ class FastScrollerDrawable {
         if (mScrollRange <= 0)
             return 0;
 
-        int viewHeight = mList.getHeight();
+        int viewHeight = mViewGroup.getHeight();
         int thumbY = (int)(scrollY / (float)mScrollRange * (viewHeight - mThumbH));
         return thumbY;
     }
@@ -491,42 +338,32 @@ class FastScrollerDrawable {
     void scrollTo(float position) {
         mScrollCompleted = true;
         int scrollTo = (int)(position * mScrollRange);
-        mList.scrollTo(0, scrollTo);
+        mViewGroup.scrollTo(0, scrollTo);
 
-        mDrawOverlay = true;
-
-        mSectionText = "mSectionText";
-//        if (sectionIndex >= 0) {
-//            String text = mSectionText = sections[sectionIndex].toString();
-//            mDrawOverlay = (text.length() != 1 || text.charAt(0) != ' ') &&
-//                    sectionIndex < sections.length;
-//        } else {
-//            mDrawOverlay = false;
-//        }
     }
 
     private void cancelFling() {
         // Cancel the list fling
         MotionEvent cancelFling = MotionEvent.obtain(0, 0, MotionEvent.ACTION_CANCEL, 0, 0, 0);
-        mList.onTouchEvent(cancelFling);
+        mViewGroup.onTouchEvent(cancelFling);
         cancelFling.recycle();
     }
 
     void cancelPendingDrag() {
-        mList.removeCallbacks(mDeferStartDrag);
+        mViewGroup.removeCallbacks(mDeferStartDrag);
         mPendingDrag = false;
     }
 
     void startPendingDrag() {
         mPendingDrag = true;
-        mList.postDelayed(mDeferStartDrag, PENDING_DRAG_DELAY);
+        mViewGroup.postDelayed(mDeferStartDrag, PENDING_DRAG_DELAY);
     }
 
     void beginDrag() {
         setState(STATE_DRAGGING);
-        if (mList != null) {
-            mList.requestDisallowInterceptTouchEvent(true);
-            //mList.reportScrollStateChange(OnScrollListener.SCROLL_STATE_TOUCH_SCROLL);
+        if (mViewGroup != null) {
+            mViewGroup.requestDisallowInterceptTouchEvent(true);
+            //mViewGroup.reportScrollStateChange(OnScrollListener.SCROLL_STATE_TOUCH_SCROLL);
         }
 
         cancelFling();
@@ -536,7 +373,7 @@ class FastScrollerDrawable {
         try {
             // gloam:
             Method isInScrollingContainerMethod = View.class.getMethod("isInScrollingContainer");
-            return (Boolean)isInScrollingContainerMethod.invoke(mList);
+            return (Boolean)isInScrollingContainerMethod.invoke(mViewGroup);
         } catch (Exception exp) {
             exp.printStackTrace();
         }
@@ -584,7 +421,7 @@ class FastScrollerDrawable {
                 // Allow a tap to scroll.
                 beginDrag();
 
-                final int viewHeight = mList.getHeight();
+                final int viewHeight = mViewGroup.getHeight();
                 // Jitter
                 int newThumbY = (int) me.getY() - mThumbH + 10;
                 if (newThumbY < 0) {
@@ -599,12 +436,12 @@ class FastScrollerDrawable {
                 // Will hit the STATE_DRAGGING check below
             }
             if (mState == STATE_DRAGGING) {
-                if (mList != null) {
+                if (mViewGroup != null) {
                     // ViewGroup does the right thing already, but there might
                     // be other classes that don't properly reset on touch-up,
                     // so do this explicitly just in case.
-                    mList.requestDisallowInterceptTouchEvent(false);
-                    //mList.reportScrollStateChange(OnScrollListener.SCROLL_STATE_IDLE);
+                    mViewGroup.requestDisallowInterceptTouchEvent(false);
+                    //mViewGroup.reportScrollStateChange(OnScrollListener.SCROLL_STATE_IDLE);
                 }
                 setState(STATE_VISIBLE);
                 final Handler handler = mHandler;
@@ -613,7 +450,7 @@ class FastScrollerDrawable {
                     handler.postDelayed(mScrollFade, 1000);
                 }
 
-                mList.invalidate();
+                mViewGroup.invalidate();
                 return true;
             }
         } else if (action == MotionEvent.ACTION_MOVE) {
@@ -621,9 +458,9 @@ class FastScrollerDrawable {
                 final float y = me.getY();
                 if (Math.abs(y - mInitialTouchY) > mScaledTouchSlop) {
                     setState(STATE_DRAGGING);
-                    if (mList != null) {
-                        mList.requestDisallowInterceptTouchEvent(true);
-                        //mList.reportScrollStateChange(OnScrollListener.SCROLL_STATE_TOUCH_SCROLL);
+                    if (mViewGroup != null) {
+                        mViewGroup.requestDisallowInterceptTouchEvent(true);
+                        //mViewGroup.reportScrollStateChange(OnScrollListener.SCROLL_STATE_TOUCH_SCROLL);
                     }
 
                     cancelFling();
@@ -632,9 +469,10 @@ class FastScrollerDrawable {
                 }
             }
             if (mState == STATE_DRAGGING) {
-                final int viewHeight = mList.getHeight();
+                final int viewHeight = mViewGroup.getHeight();
                 // Jitter
-                int newThumbY = (int) me.getY() - mThumbH + 10;
+                //int newThumbY = (int) me.getY() - mThumbH + 10;
+                int newThumbY = (int)me.getY() - mPressOffsetInThumb;
                 if (newThumbY < 0) {
                     newThumbY = 0;
                 } else if (newThumbY + mThumbH > viewHeight) {
@@ -657,20 +495,12 @@ class FastScrollerDrawable {
     }
 
     boolean isPointInside(float x, float y) {
-        boolean inTrack = false;
-        switch (mPosition) {
-            default:
-            case View.SCROLLBAR_POSITION_DEFAULT:
-            case View.SCROLLBAR_POSITION_RIGHT:
-                inTrack = x > mList.getWidth() - mThumbW;
-                break;
-            case View.SCROLLBAR_POSITION_LEFT:
-                inTrack = x < mThumbW;
-                break;
-        }
+        boolean inTrack = x > mViewGroup.getWidth() - mThumbW;;
 
         // Allow taps in the track to start moving.
-        return inTrack && (mTrackDrawable != null || y >= mThumbY && y <= mThumbY + mThumbH);
+        boolean inside = inTrack && (mTrackDrawable != null || y >= mThumbY && y <= mThumbY + mThumbH);
+        mPressOffsetInThumb = (int)y - mThumbY;
+        return inside;
     }
 
     // updateLongList
@@ -681,7 +511,6 @@ class FastScrollerDrawable {
     }
 
     public class ScrollFade implements Runnable {
-
         long mStartTime;
         long mFadeDuration;
         static final int ALPHA_MAX = 208;
@@ -714,7 +543,7 @@ class FastScrollerDrawable {
             }
 
             if (getAlpha() > 0) {
-                mList.invalidate();
+                mViewGroup.invalidate();
             } else {
                 setState(STATE_NONE);
             }

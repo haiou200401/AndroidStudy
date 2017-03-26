@@ -68,14 +68,6 @@ public class CustomView extends FrameLayout implements View.OnClickListener{
     }
 
     @Override
-    public void setVerticalScrollbarPosition(int position) {
-        super.setVerticalScrollbarPosition(position);
-        if (mFastScroller != null) {
-            mFastScroller.setScrollbarPosition(position);
-        }
-    }
-
-    @Override
     public void setScrollBarStyle(int style) {
         super.setScrollBarStyle(style);
         if (mFastScroller != null) {
@@ -157,16 +149,17 @@ public class CustomView extends FrameLayout implements View.OnClickListener{
         canvas.drawRect(rc, paint);
 
         if (mFastScroller != null) {
-            final int scrollY = mScrollY;
-            if (scrollY != 0) {
-                // Pin to the top/bottom during overscroll
-                int restoreCount = canvas.save();
-                canvas.translate(0, (float) scrollY);
-                mFastScroller.draw(canvas);
-                canvas.restoreToCount(restoreCount);
-            } else {
-                mFastScroller.draw(canvas);
-            }
+            mFastScroller.draw(canvas);
+//            final int scrollY = mScrollY;
+//            if (scrollY != 0) {
+//                // Pin to the top/bottom during overscroll
+//                int restoreCount = canvas.save();
+//                canvas.translate(0, (float) scrollY);
+//                mFastScroller.draw(canvas);
+//                canvas.restoreToCount(restoreCount);
+//            } else {
+//                mFastScroller.draw(canvas);
+//            }
         }
     }
 
