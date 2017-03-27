@@ -1,5 +1,8 @@
 package com.yiming.myapplication.view;
 
+import android.graphics.Color;
+import android.graphics.Path;
+import android.graphics.RectF;
 import android.os.SystemClock;
 
 import android.content.Context;
@@ -24,6 +27,17 @@ import java.lang.reflect.Method;
 class FastScrollerDrawable {
     private static final String TAG = "FastScrollerDrawable";
 
+    private final float THUMB_MARGIN_MIN_DIP = 2f;
+    private final float THUMB_MARGIN_LEFT_DIP = 6f;
+    private final float THUMB_WIDTH_DIP = 28.0f + THUMB_MARGIN_LEFT_DIP + THUMB_MARGIN_MIN_DIP; // dp
+    private final float THUMB_HEIGHT_DIP = 46.0f + THUMB_MARGIN_MIN_DIP * 2; // dp
+
+
+    private final int THUMB_COLOR_BG_NORMAL = Color.argb(64, 168, 168, 168);
+    private final int THUMB_COLOR_BG_PRESS = Color.argb(132, 168, 168, 168);
+    private final int THUMB_COLOR_ARROWS_NORMAL = Color.argb(218, 146, 146, 146);
+    private final int THUMB_COLOR_ARROWS_PRESS = Color.argb(218, 246, 246, 246);
+
     // Minimum number of pages to justify showing a fast scroll thumb
     private static int MIN_PAGES = 4;
     // Scroll thumb not showing
@@ -46,28 +60,19 @@ class FastScrollerDrawable {
     private static final int[] ATTRS = new int[] {
             android.R.attr.fastScrollTextColor,
             android.R.attr.fastScrollThumbDrawable,
-            android.R.attr.fastScrollTrackDrawable,
-            android.R.attr.fastScrollPreviewBackgroundLeft,
-            android.R.attr.fastScrollPreviewBackgroundRight,
-            android.R.attr.fastScrollOverlayPosition
     };
 
     private static final int TEXT_COLOR = 0;
     private static final int THUMB_DRAWABLE = 1;
-    private static final int TRACK_DRAWABLE = 2;
-    private static final int PREVIEW_BACKGROUND_LEFT = 3;
-    private static final int PREVIEW_BACKGROUND_RIGHT = 4;
-    private static final int OVERLAY_POSITION = 5;
-
-    private static final int OVERLAY_FLOATING = 0;
-    private static final int OVERLAY_AT_THUMB = 1;
 
     private Drawable mThumbDrawable;
-    private Drawable mTrackDrawable;
 
     int mThumbH;
     int mThumbW;
     int mThumbY;
+
+    int mThumbMarginMin;
+    int mThumbMarginLeft;
 
     ViewGroup mViewGroup;
     boolean mScrollCompleted;
@@ -96,7 +101,7 @@ class FastScrollerDrawable {
 
     private final Runnable mDeferStartDrag = new Runnable() {
         public void run() {
-            if (mViewGroup.isAttachedToWindow()) { //mViewGroup.mIsAttached) {
+            if (mViewGroup.isAttachedToWindow()) {
                 beginDrag();
 
                 final int viewHeight = mViewGroup.getHeight();
@@ -115,8 +120,8 @@ class FastScrollerDrawable {
         }
     };
 
-    public FastScrollerDrawable(Context context, ViewGroup listView) {
-        mViewGroup = listView;
+    public FastScrollerDrawable(Context context, ViewGroup viewGroup) {
+        mViewGroup = viewGroup;
         init(context);
     }
 
@@ -139,9 +144,6 @@ class FastScrollerDrawable {
 
         if (mThumbDrawable != null && mThumbDrawable.isStateful()) {
             mThumbDrawable.setState(state);
-        }
-        if (mTrackDrawable != null && mTrackDrawable.isStateful()) {
-            mTrackDrawable.setState(state);
         }
     }
 
@@ -183,16 +185,14 @@ class FastScrollerDrawable {
     }
 
     private void useThumbDrawable(Context context, Drawable drawable) {
+        final float scale = context.getResources().getDisplayMetrics().density;
+        mThumbW = (int)(THUMB_WIDTH_DIP * scale + 0.5f);
+        mThumbH = (int)(THUMB_HEIGHT_DIP * scale + 0.5f);
+
+        mThumbMarginMin = (int)(THUMB_MARGIN_MIN_DIP * scale + 0.5f);
+        mThumbMarginLeft = (int)(THUMB_MARGIN_LEFT_DIP * scale + 0.5f);
+
         mThumbDrawable = drawable;
-//        if (drawable instanceof NinePatchDrawable) {
-            mThumbW = context.getResources().getDimensionPixelSize(
-                    R.dimen.fastscroll_thumb_width);
-            mThumbH = context.getResources().getDimensionPixelSize(
-                    R.dimen.fastscroll_thumb_height);
-//        } else {
-//            mThumbW = drawable.getIntrinsicWidth();
-//            mThumbH = drawable.getIntrinsicHeight();
-//        }
         mChangedBounds = true;
     }
 
@@ -200,7 +200,6 @@ class FastScrollerDrawable {
         // Get both the scrollbar states drawables
         TypedArray ta = context.getTheme().obtainStyledAttributes(ATTRS);
         useThumbDrawable(context, ta.getDrawable(THUMB_DRAWABLE));
-        //mTrackDrawable = ta.getDrawable(TRACK_DRAWABLE);
 
         mScrollCompleted = true;
         mScrollFade = new ScrollFade();
@@ -247,12 +246,10 @@ class FastScrollerDrawable {
             return;
         }
 
-        canvas.save();
         int scrollY = mViewGroup.getScrollY();
         canvas.translate(0, scrollY);
         drawScrollBar(canvas);
-        canvas.restore();
-
+        canvas.translate(0, -scrollY);
     }
 
     void drawScrollBar(Canvas canvas) {
@@ -262,41 +259,100 @@ class FastScrollerDrawable {
         final FastScrollerDrawable.ScrollFade scrollFade = mScrollFade;
 
         int alpha = -1;
+        Rect bound = new Rect();
         if (mState == STATE_EXIT) {
             alpha = scrollFade.getAlpha();
             if (alpha < ScrollFade.ALPHA_MAX / 2) {
                 mThumbDrawable.setAlpha(alpha * 2);
             }
             int left = viewWidth - (mThumbW * alpha) / ScrollFade.ALPHA_MAX;
+            bound.set(left, 0, left + mThumbW, mThumbH);
             mThumbDrawable.setBounds(left, 0, left + mThumbW, mThumbH);
             mChangedBounds = true;
-        }
-
-        if (mTrackDrawable != null) {
-            final Rect thumbBounds = mThumbDrawable.getBounds();
-            final int left = thumbBounds.left;
-            final int halfThumbHeight = (thumbBounds.bottom - thumbBounds.top) / 2;
-            final int trackWidth = mTrackDrawable.getIntrinsicWidth();
-            final int trackLeft = (left + mThumbW / 2) - trackWidth / 2;
-            mTrackDrawable.setBounds(trackLeft, halfThumbHeight,
-                    trackLeft + trackWidth, mViewGroup.getHeight() - halfThumbHeight);
-            mTrackDrawable.draw(canvas);
+        } else {
+            int left = viewWidth - mThumbW;
+            bound.set(left, 0, left + mThumbW, mThumbH);
         }
 
         canvas.translate(0, y);
         mThumbDrawable.draw(canvas);
+
+//        RectF rectF = new RectF(bound.left + mThumbMarginLeft, bound.top + mThumbMarginMin,
+//                bound.right - mThumbMarginMin, bound.bottom - mThumbMarginMin);
+//        drawThumb(canvas, rectF);
+
         canvas.translate(0, -y);
 
         if (mState == STATE_EXIT) {
             if (alpha == 0) { // Done with exit
                 setState(STATE_NONE);
-            } else if (mTrackDrawable != null) {
-                mViewGroup.invalidate(viewWidth - mThumbW, 0, viewWidth, mViewGroup.getHeight());
             } else {
                 onlyInvalidateThumb();
             }
         }
     }
+
+    void drawThumb(Canvas canvas, final RectF boundf) {
+        Paint paint = new Paint();
+        paint.setStyle(Paint.Style.FILL_AND_STROKE);
+        paint.setAntiAlias(true);
+        paint.setAlpha(mThumbDrawable.getAlpha());
+
+        if (STATE_DRAGGING == mState) {
+            paint.setColor(THUMB_COLOR_BG_PRESS);
+        } else {
+            paint.setColor(THUMB_COLOR_BG_NORMAL);
+        }
+
+        // draw thumb background.
+        float radus = boundf.width()/5.0f;
+        canvas.drawRoundRect(boundf, radus, radus, paint);
+
+
+        // begin draw arrows & lines.
+        if (STATE_DRAGGING == mState) {
+            paint.setColor(THUMB_COLOR_ARROWS_PRESS);
+        } else {
+            paint.setColor(THUMB_COLOR_ARROWS_NORMAL);
+        }
+
+        float oneThird = boundf.height() / 3.0f;
+        float xChenter = boundf.width() / 2.0f + boundf.left;
+        float arrowsHeight = (oneThird / 5.0f);
+        float arrowsWidth = arrowsHeight * 1.6f;
+        float arrowsLeft = (boundf.width() - arrowsWidth) / 2.0f + boundf.left;
+        float arrowsRight = arrowsLeft + arrowsWidth;
+
+        // up arrows
+        Path path = new Path();
+        path.moveTo(xChenter, oneThird - arrowsHeight + boundf.top); // top point.
+        path.lineTo(arrowsLeft, oneThird + boundf.top);
+        path.lineTo(arrowsRight, oneThird + boundf.top);
+        path.close();
+
+        // down arrows
+        path.moveTo(xChenter, oneThird * 2 + arrowsHeight + boundf.top);
+        path.lineTo(arrowsLeft, oneThird * 2 + boundf.top);
+        path.lineTo(arrowsRight, oneThird * 2 + boundf.top);
+        path.close();
+
+        // stroke arrows
+        canvas.drawPath(path, paint);
+
+        // center line
+        float lineWidth = oneThird / 8.0f;
+        float lineLength = boundf.width() * 0.42f;
+        float lineLeft = (boundf.width() - lineLength) / 2.0f + boundf.left;
+        float lineRight = lineLeft + lineLength;
+        float line1Y = oneThird + oneThird / 3.0f + boundf.top;
+        float line2Y = oneThird + oneThird / 3.0f * 2.0f + boundf.top;
+        paint.setStrokeWidth(lineWidth);
+        paint.setStyle(Paint.Style.STROKE);
+        paint.setStrokeCap(Paint.Cap.ROUND);
+        canvas.drawLine(lineLeft, line1Y, lineRight, line1Y, paint);
+        canvas.drawLine(lineLeft, line2Y, lineRight, line2Y, paint);
+    }
+
 
     void onSizeChanged(int w, int h, int oldw, int oldh) {
         if (mThumbDrawable != null) {
@@ -498,7 +554,7 @@ class FastScrollerDrawable {
         boolean inTrack = x > mViewGroup.getWidth() - mThumbW;;
 
         // Allow taps in the track to start moving.
-        boolean inside = inTrack && (mTrackDrawable != null || y >= mThumbY && y <= mThumbY + mThumbH);
+        boolean inside = inTrack && (y >= mThumbY && y <= mThumbY + mThumbH);
         mPressOffsetInThumb = (int)y - mThumbY;
         return inside;
     }

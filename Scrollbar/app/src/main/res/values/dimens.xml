@@ -10,9 +10,9 @@
     <!-- Padding of the fastscroll overlay -->
     <dimen name="fastscroll_overlay_padding">16dp</dimen>
     <!-- Width of the fastscroll thumb -->
-    <dimen name="fastscroll_thumb_width">64dp</dimen>
+    <dimen name="fastscroll_thumb_width">28dp</dimen>
     <!-- Height of the fastscroll thumb -->
-    <dimen name="fastscroll_thumb_height">52dp</dimen>
+    <dimen name="fastscroll_thumb_height">46dp</dimen>
     <!-- Min width for a tablet device -->
     <dimen name="min_xlarge_screen_width">800dp</dimen>
 
