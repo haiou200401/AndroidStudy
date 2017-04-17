@@ -12,8 +12,6 @@ import android.widget.FrameLayout;
 
 import com.yiming.myapplication.R;
 
-import java.util.Map;
-
 /**
  * Created by gaoqingguang on 2017/3/25.
  */
@@ -23,7 +21,7 @@ public class CustomView extends FrameLayout implements View.OnClickListener{
     private int mScrollRangeY = 0;
     private int mScrollY = 0;
 
-    private FastScrollerDrawable mFastScroller;
+    private AwContentsScroller mFastScroller;
 
     public CustomView(Context context) {
         this(context, null);
@@ -37,7 +35,7 @@ public class CustomView extends FrameLayout implements View.OnClickListener{
 
         setWillNotDraw(false);
 
-        mFastScroller = new FastScrollerDrawable(this.getContext(), this);
+        mFastScroller = new AwContentsScroller(this.getContext(), this);
         //mFastScroller.setEnabled(true);
         //mFastScroller.setAlwaysShow(true);
         mFastScroller.updateScrollRange(1500*4);
